@@ -6,11 +6,11 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
 
-        // watch for changes and trigger compass, jshint, uglify and livereload
+        // watch for changes and trigger sass, jshint, uglify and livereload
         watch: {
-            compass: {
+            sass: {
                 files: ['assets/scss/**/*.{scss,sass}'],
-                tasks: ['compass']
+                tasks: ['sass']
             },
             js: {
                 files: '<%= jshint.all %>',
@@ -18,16 +18,25 @@ module.exports = function(grunt) {
             },
             livereload: {
                 options: { livereload: true },
-                files: ['style.css', 'assets/js/*.js', '*.html', '*.php', 'assets/images/**/*.{png,jpg,jpeg,gif,webp,svg}']
+                files: ['assets/css/style.css', 'assets/js/*.js', '*.html', '*.php', 'assets/images/**/*.{png,jpg,jpeg,gif,webp,svg}']
             }
         },
 
-        // compass and scss
-        compass: {
+        // sass and scss
+        sass: {
             dist: {
                 options: {
-                    config: 'config.rb',
-                    force: true
+                    sourcemap: true,
+                    style: 'compressed',
+                    precision: '2',
+                    compass: true,
+                    cache: 'delete/'
+                },
+                files: {
+                    // 'assets/scss/style.scss':'assets/css/style.css',
+                    // 'assets/scss/no-mq.scss':'assets/css/no-mq.css'
+                    'assets/css/style.css':'assets/scss/style.scss',
+                    'assets/css/no-mq.css':'assets/scss/no-mq.scss'
                 }
             }
         },
@@ -36,7 +45,8 @@ module.exports = function(grunt) {
         jshint: {
             options: {
                 jshintrc: '.jshintrc',
-                "force": true
+                "force": true,
+                ignores: ['assets/js/source/selectivizr.js']
             },
             all: [
                 'Gruntfile.js',
@@ -48,74 +58,45 @@ module.exports = function(grunt) {
         uglify: {
             plugins: {
                 options: {
-                    sourceMap: 'assets/js/plugins.js.map',
-                    sourceMappingURL: 'plugins.js.map',
+                    sourceMap: 'assets/js/script.js.map',
+                    sourceMappingURL: 'script.js.map',
                     sourceMapPrefix: 2
                 },
                 files: {
-                    'assets/js/plugins.min.js': [
-                        'assets/js/source/plugins.js',
-                        // 'assets/js/vendor/yourplugin/yourplugin.js',
+                    'assets/js/script.min.js': [
+                        'assets/js/source/*.js'
                     ]
                 }
             },
             main: {
                 options: {
-                    sourceMap: 'assets/js/main.js.map',
-                    sourceMappingURL: 'main.js.map',
+                    sourceMap: 'assets/js/app.js.map',
+                    sourceMappingURL: 'app.js.map',
                     sourceMapPrefix: 2
                 },
                 files: {
-                    'assets/js/main.min.js': [
-                        'assets/js/source/main.js'
+                    'assets/js/app.min.js': [
+                        'assets/js/source/app.js'
                     ]
                 }
-            }
-        },
-
-        // image optimization
-        imagemin: {
-            dist: {
+            },
+            app: {
                 options: {
-                    optimizationLevel: 7,
-                    progressive: true
+                    sourceMap: 'assets/js/ie.js.map',
+                    sourceMappingURL: 'ie.js.map',
+                    sourceMapPrefix: 2
                 },
-                files: [{
-                    expand: true,
-                    cwd: 'assets/images/',
-                    src: '**/*',
-                    dest: 'assets/images/'
-                }]
-            }
-        },
-
-        // deploy via rsync
-        deploy: {
-            options: {
-                src: "./",
-                args: ["--verbose"],
-                exclude: ['.git*', 'node_modules', '.sass-cache', 'Gruntfile.js', 'package.json', '.DS_Store', 'README.md', 'config.rb', '.jshintrc'],
-                recursive: true,
-                syncDestIgnoreExcl: true
-            },
-            staging: {
-                options: {
-                    dest: "~/path/to/theme",
-                    host: "user@host.com"
-                }
-            },
-            production: {
-                options: {
-                    dest: "~/path/to/theme",
-                    host: "user@host.com"
+                files: {
+                    'assets/js/ie.min.js': [
+                        'assets/js/source/selectivizr.js',
+                        'assets/js/source/ie.js'
+                    ]
                 }
             }
         }
 
     });
 
-    // rename tasks
-    grunt.renameTask('rsync', 'deploy');
 
     // register task
     grunt.registerTask('default', ['watch']);
